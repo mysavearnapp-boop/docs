@@ -1,0 +1,278 @@
+---
+title: "AI chat agent data template"
+description: "Template for structuring data documentation that AI chat support agents can understand and use effectively"
+---
+
+Use this template to document data, processes, and information for AI chat support agents. Each piece of information should include these key elements to maximize AI comprehension and accuracy.
+
+## Template structure
+
+For each piece of data or information, include:
+
+### 1. Title and purpose
+
+**What to include:**
+- Clear, descriptive title using keywords the AI will search for
+- Brief statement of what this information is used for
+- When this information should be referenced
+
+**Example:**
+```markdown
+## Password reset process
+Use this when users cannot access their account due to forgotten credentials.
+Applies to: All user account types
+```
+
+### 2. Context and scope
+
+**What to include:**
+- Who this applies to (user types, account tiers, regions)
+- Prerequisites or conditions that must be met
+- Related systems, features, or processes
+- Version or date information if time-sensitive
+
+**Example:**
+```markdown
+**Applies to:** Free and Pro tier users
+**Prerequisites:** User must have verified email address
+**Related:** Account security settings, Two-factor authentication
+**Last updated:** January 2026
+```
+
+### 3. Step-by-step instructions
+
+**What to include:**
+- Numbered sequential steps in logical order
+- Expected outcome for each step
+- Specific UI elements, button names, or exact text to reference
+- Alternative paths if applicable
+
+**Example:**
+<Steps>
+<Step title="Navigate to login page">
+User should click "Sign In" button in top right corner.
+
+**Expected result:** Login form appears with email and password fields.
+</Step>
+
+<Step title="Click forgot password link">
+Below the password field, click "Forgot your password?" link.
+
+**Expected result:** Password reset form appears requesting email address.
+</Step>
+</Steps>
+
+### 4. Key data points
+
+**What to include:**
+- Specific values, limits, or constraints
+- Technical specifications
+- Error codes or status indicators
+- Timing information (how long processes take)
+
+**Example:**
+```markdown
+**Rate limits:** 3 password reset attempts per hour
+**Reset link validity:** 24 hours
+**Password requirements:** 
+- Minimum 8 characters
+- At least 1 uppercase letter
+- At least 1 number
+- At least 1 special character
+```
+
+### 5. Common issues and solutions
+
+**What to include:**
+- Frequently encountered problems
+- Error messages users might see
+- Troubleshooting steps
+- When to escalate to human support
+
+**Example:**
+<AccordionGroup>
+<Accordion title="User doesn't receive reset email">
+**Possible causes:**
+- Email in spam folder
+- Incorrect email address entered
+- Email delivery delay (up to 10 minutes)
+
+**Solution steps:**
+1. Ask user to check spam/junk folder
+2. Verify email address spelling
+3. Wait 10 minutes and try again
+4. If still not received, escalate to support team
+</Accordion>
+
+<Accordion title="Reset link expired">
+**Error message:** "This password reset link has expired"
+
+**Solution:** Generate new reset link by repeating the password reset process
+</Accordion>
+</AccordionGroup>
+
+### 6. Important warnings and edge cases
+
+**What to include:**
+- Actions that cannot be undone
+- Security considerations
+- Unusual scenarios or exceptions
+- System limitations
+
+**Example:**
+<Warning>
+Password reset immediately invalidates all active sessions. User will be logged out of all devices.
+</Warning>
+
+<Note>
+**Edge case:** Users with SSO (Single Sign-On) authentication cannot reset passwords through this process. Direct them to their organization's IT administrator.
+</Note>
+
+### 7. Related information and next steps
+
+**What to include:**
+- Links to related documentation
+- Follow-up actions users might need
+- Additional resources
+
+**Example:**
+```markdown
+**Related topics:**
+- [Two-factor authentication setup](/security/2fa)
+- [Account security best practices](/security/best-practices)
+- [SSO configuration](/enterprise/sso)
+
+**Next steps after password reset:**
+- User should update password in password manager
+- Consider enabling two-factor authentication
+- Review recent account activity
+```
+
+## Complete example
+
+Here's a full example following this template:
+
+---
+
+## API rate limit information
+
+Use this when users encounter rate limiting errors or ask about API usage limits.
+
+**Applies to:** All API users (Free, Pro, Enterprise tiers)  
+**Related:** API authentication, Error codes, Usage dashboard  
+**Last updated:** January 2026
+
+### Rate limit tiers
+
+<Tabs>
+<Tab title="Free tier">
+**Requests per minute:** 60  
+**Requests per day:** 1,000  
+**Burst allowance:** 10 requests
+</Tab>
+
+<Tab title="Pro tier">
+**Requests per minute:** 600  
+**Requests per day:** 100,000  
+**Burst allowance:** 50 requests
+</Tab>
+
+<Tab title="Enterprise tier">
+**Requests per minute:** Custom (negotiated)  
+**Requests per day:** Custom (negotiated)  
+**Burst allowance:** Custom (negotiated)
+</Tab>
+</Tabs>
+
+### How rate limiting works
+
+<Steps>
+<Step title="Request is received">
+API receives the request and checks the user's current rate limit status.
+
+**Headers returned:**
+- `X-RateLimit-Limit`: Maximum requests allowed
+- `X-RateLimit-Remaining`: Requests remaining in current window
+- `X-RateLimit-Reset`: Unix timestamp when limit resets
+</Step>
+
+<Step title="Rate limit check">
+System verifies if user is within their allowed limits.
+
+**If within limits:** Request processes normally  
+**If exceeded:** Returns 429 error
+</Step>
+</Steps>
+
+### Error response
+
+When rate limit is exceeded, users receive:
+
+```json
+{
+  "error": "rate_limit_exceeded",
+  "message": "You have exceeded your rate limit. Please try again in 45 seconds.",
+  "retry_after": 45,
+  "limit": 60,
+  "window": "1 minute"
+}
+```
+
+### Common issues
+
+<AccordionGroup>
+<Accordion title="Hitting rate limits unexpectedly">
+**Possible causes:**
+- Multiple services using same API key
+- Inefficient polling instead of webhooks
+- Not implementing exponential backoff
+
+**Solutions:**
+1. Check if multiple applications share the API key
+2. Implement webhook listeners instead of polling
+3. Add exponential backoff retry logic
+4. Consider upgrading to higher tier
+</Accordion>
+
+<Accordion title="Rate limit not resetting">
+**Error:** User reports limits not resetting after time window
+
+**Troubleshooting:**
+1. Verify user is checking correct time zone (limits use UTC)
+2. Confirm `X-RateLimit-Reset` header value
+3. Check if user has multiple API keys and is confusing them
+4. If issue persists after 5 minutes, escalate to engineering team
+</Accordion>
+</AccordionGroup>
+
+<Warning>
+Rate limits are enforced per API key, not per user account. If a user has multiple API keys, each has independent rate limits.
+</Warning>
+
+<Tip>
+Recommend users implement caching and batch requests to stay within rate limits efficiently.
+</Tip>
+
+### Related information
+
+- [API authentication guide](/api/authentication)
+- [Webhook setup](/api/webhooks)
+- [Error code reference](/api/errors)
+- [Upgrade to Pro tier](/pricing)
+
+---
+
+## Best practices for AI comprehension
+
+When writing data documentation for AI chat agents:
+
+1. **Use consistent terminology** - Don't alternate between synonyms (e.g., "user" vs "customer")
+2. **Be explicit, not implicit** - State conditions clearly rather than assuming context
+3. **Include searchable keywords** - Think about what users will ask and include those terms
+4. **Provide complete information** - Don't reference external knowledge the AI might not have
+5. **Use structured formats** - Tables, lists, and code blocks are easier for AI to parse
+6. **Date your information** - Include "Last updated" dates so AI knows if information might be stale
+7. **Link related topics** - Help AI understand the broader context and related information
+8. **Include exact error messages** - Use the precise text users will see
+9. **Specify units and formats** - Don't say "wait a while", say "wait 5-10 minutes"
+10. **Test with real questions** - Ask the AI questions users would ask and refine based on responses
